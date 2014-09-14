@@ -1,0 +1,41 @@
+server {
+  listen   80; ## listen for ipv4; this line is default and implied
+  listen   [::]:80 default ipv6only=on; ## listen for ipv6
+
+  root <%= node['nginx']['default_root'] %>;
+  index index.php index.html index.htm;
+
+  server_name <%= node['hostname'] %>;
+
+  location / {
+    # First attempt to serve request as file, then
+    # as directory, then fall back to index.html
+    try_files $uri $uri/ /index.html;
+  }
+
+
+
+  # redirect server error pages to the static page /50x.html
+  #
+  error_page 500 502 503 504 /50x.html;
+  location = /50x.html {
+    root <%= node['nginx']['default_root'] %>;
+  }
+
+  # pass the PHP scripts to FastCGI server listening on /tmp/php5-fpm.sock
+  #
+  location ~ \.php$ {
+    try_files $uri =404;
+    fastcgi_split_path_info ^(.+\.php)(/.+)$;
+    fastcgi_pass unix:/var/run/php-fpm-www.sock;
+    fastcgi_index index.php;
+    include fastcgi_params;
+  }
+
+  # deny access to .htaccess files, if Apache's document root
+  # concurs with nginx's one
+  #
+  location ~ /\.ht {
+    deny all;
+  }
+}
